@@ -166,7 +166,7 @@ const TableComponent = () => {
       dataIndex: "population",
       key: "population",
       ...getColumnSearchProps("population"),
-      sorter: (a, b) => a.population.localeCompare(b.population),
+      sorter: (a, b) => Number(a.population) - Number(b.population),
       sortOrder: sortedInfo.columnKey === "population" && sortedInfo.order,
       ellipsis: true,
     },
