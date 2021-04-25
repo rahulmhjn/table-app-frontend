@@ -16,13 +16,17 @@ const TableComponent = () => {
 
   const [TableData, setTableData] = useState([]);
 
-  useEffect(async () => {
-    const result = await axios(
-      "https://salty-tor-91350.herokuapp.com/api/countries"
-    );
+  useEffect(() => {
+    async function fetchData() {
+      const result = await axios(
+        "https://salty-tor-91350.herokuapp.com/api/countries"
+      );
 
-    console.log(result);
-    setTableData(result.data);
+      console.log(result);
+      setTableData(result.data);
+    }
+
+    fetchData();
   }, [NewData]);
 
   const searchInput = React.useRef(null);
