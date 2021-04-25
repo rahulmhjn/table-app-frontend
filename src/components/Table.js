@@ -1,49 +1,29 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Table, Input, Button, Space } from "antd";
 import "antd/dist/antd.css";
 import Highlighter from "react-highlight-words";
 import { SearchOutlined } from "@ant-design/icons";
+import axios from "axios";
+import Upload from "./Upload";
 
 const TableComponent = () => {
-  const data = [
-    {
-      key: "1",
-      country: "India",
-      capital: "Delhi",
-      population: 1001111,
-      language: "Hindi",
-      president: "Ram Nath Kovind",
-    },
-    {
-      key: "2",
-      country: "UK",
-      capital: "London",
-      population: 122,
-      language: "English",
-      president: "Shyam",
-    },
-    {
-      key: "3",
-      country: "Australia",
-      capital: "Melbourne",
-      population: 232323,
-      language: "English",
-      president: "Amit",
-    },
-    {
-      key: "4",
-      country: "USA",
-      capital: "Washington D.C",
-      population: 333636,
-      language: "American-English",
-      president: "Joe Biden",
-    },
-  ];
+  const [NewData, setNewData] = useState();
 
   const [state, setState] = React.useState({
     searchText: "",
     searchedColumn: "",
   });
+
+  const [TableData, setTableData] = useState([]);
+
+  useEffect(async () => {
+    const result = await axios(
+      "https://salty-tor-91350.herokuapp.com/api/countries"
+    );
+
+    console.log(result);
+    setTableData(result.data);
+  }, [NewData]);
 
   const searchInput = React.useRef(null);
 
@@ -139,6 +119,23 @@ const TableComponent = () => {
     setState({ searchText: "" });
   };
 
+  const [sort, setSort] = React.useState({
+    filteredInfo: null,
+    sortedInfo: null,
+  });
+
+  const handleChange = (pagination, filters, sorter) => {
+    console.log("Various parameters", pagination, filters, sorter);
+    setSort({
+      filteredInfo: filters,
+      sortedInfo: sorter,
+    });
+  };
+
+  let { sortedInfo, filteredInfo } = sort;
+  sortedInfo = sortedInfo || {};
+  filteredInfo = filteredInfo || {};
+
   const columns = [
     {
       title: "Country",
@@ -146,6 +143,9 @@ const TableComponent = () => {
       key: "country",
       width: "30%",
       ...getColumnSearchProps("country"),
+      sorter: (a, b) => a.country.localeCompare(b.country),
+      sortOrder: sortedInfo.columnKey === "country" && sortedInfo.order,
+      ellipsis: true,
     },
     {
       title: "Capital",
@@ -153,30 +153,62 @@ const TableComponent = () => {
       key: "capital",
       width: "20%",
       ...getColumnSearchProps("capital"),
+      sorter: (a, b) => a.capital.localeCompare(b.capital),
+      sortOrder: sortedInfo.columnKey === "capital" && sortedInfo.order,
+      ellipsis: true,
     },
     {
       title: "Population",
       dataIndex: "population",
       key: "population",
       ...getColumnSearchProps("population"),
+      sorter: (a, b) => a.population.localeCompare(b.population),
+      sortOrder: sortedInfo.columnKey === "population" && sortedInfo.order,
+      ellipsis: true,
     },
     {
       title: "Language",
       dataIndex: "language",
       key: "language",
       ...getColumnSearchProps("language"),
+      sorter: (a, b) => a.language.localeCompare(b.language),
+      sortOrder: sortedInfo.columnKey === "language" && sortedInfo.order,
+      ellipsis: true,
     },
     {
       title: "President",
       dataIndex: "president",
       key: "president",
       ...getColumnSearchProps("president"),
+      sorter: (a, b) => a.president.localeCompare(b.president),
+      sortOrder: sortedInfo.columnKey === "president" && sortedInfo.order,
+      ellipsis: true,
     },
   ];
 
   return (
     <div>
-      <Table columns={columns} dataSource={data} />;
+      <Space style={{ marginBottom: 16 }}>
+        <Upload setNewData={setNewData} />
+        <Button type="primary">
+          <a href="csv/file.xlsx" download>
+            Download CSV
+          </a>
+        </Button>
+      </Space>
+      <Table
+        columns={columns}
+        dataSource={TableData}
+        onChange={handleChange}
+        // pagination={false}
+        // pageSizeOptions="[10, 20, 50, 100]"
+        pagination={{
+          pageSizeOptions: ["25", "50", "100", "500"],
+          showSizeChanger: true,
+          defaultPageSize: 25,
+        }}
+      />
+      ;
     </div>
   );
 };
